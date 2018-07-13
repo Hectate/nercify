@@ -1,0 +1,116 @@
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+    <title>NERC Cert Quiz</title>
+
+    <!-- Required Stylesheets -->
+    <link type="text/css" rel="stylesheet" href="./css/bootstrap.min.css"/>
+    <link type="text/css" rel="stylesheet" href="./css/bootstrap-vue.css"/>
+
+    <!-- Required scripts -->
+    <script src="./js/vue.min.js"></script>
+    <script src="./js/polyfill.min.js"></script>
+    <script src="./js/bootstrap-vue.js"></script>
+  </head>
+
+  <body>
+    <!-- Our application root element -->
+    <div id="app">
+        <b-container>
+          <b-navbar toggleable="md" sticky=true type="dark" variant="dark">
+                  <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
+                  <b-navbar-brand href="#" @click="setPage('intro')">NERC Quiz</b-navbar-brand>
+                  <b-collapse is-nav id="nav_collapse">
+                    <b-navbar-nav>
+                      <b-nav-item href="#" @click="startQuiz()">Start a Quiz</b-nav-item>
+                      <b-nav-item href="" @click="setPage('results')">View Results</b-nav-item>
+                    </b-navbar-nav>
+                  </b-collapse>
+                </b-navbar>
+          </b-navbar>
+          <div v-if="page == 'quiz'">
+            <b-card v-if="q != null" no-body title="Question">
+              <b-card-body>
+                <p class="card-text">
+                  {{qlist[q].q}}
+                </p>
+                <b-button-group vertical >
+                  <b-button 
+                  v-bind:variant="getButtonVariant(itm.correct)" 
+                  v-for="(itm,ind) in qlist[this.q].a" 
+                  @click="setSelectionFocus(ind)" 
+                  v-bind:pressed="isSelectionFocus(ind)"
+                  v-bind:disabled="!isCorrectAnswerWhileChecked(ind)">
+                    {{itm.text}}
+                  </b-button>
+                </b-button-group>
+              </b-card-body>
+              <b-card-footer>
+                  <b-button-toolbar >
+                      <b-button-group class="mx-1">
+                          <b-button v-bind:disabled="selection == null" v-if="checked != true" @click="checkAnswer()" variant="outline-dark">
+                            Check
+                          </b-button>
+                          <b-button v-if="checked == true" @click="nextQuestion()" variant="outline-dark">
+                            Next
+                          </b-button>
+                          <b-button @click="skipQuestion()" v-bind:disabled="checked" variant="outline-dark">
+                            Skip
+                          </b-button>
+                      </b-button-group>
+                  </b-button-toolbar>
+              </b-card-footer>
+            </b-card>
+            <b-card>
+              <b-container>
+                <b-row>
+                  <b-col cols="9">
+                    <b-progress>
+                      <b-progress-bar :value="correct" :max="max" variant="success"></b-progress-bar>
+                      <b-progress-bar :value="skipped" :max="max" variant="warning"></b-progress-bar>
+                      <b-progress-bar :value="wrong" :max="max" variant="danger"></b-progress-bar>
+                    </b-progress>
+                  </b-col>
+                  <b-col>
+                      {{hours}}:{{new Intl.NumberFormat('en-IN',{minimumIntegerDigits:2}).format(mins)}}:{{new Intl.NumberFormat('en-IN',{minimumIntegerDigits:2}).format(secs)}} elapsed
+                  </b-col>
+                </b-row>
+              </b-container>
+            </b-card>
+          </div>
+          <div v-if="page == 'results'">
+            <b-card title="Result">
+              <p class="card-text">
+                Correct Answers: {{correct}}<br>
+                Skipped Questions: {{skipped}}<br>
+                Wrong Answers: {{wrong}}
+              </p>
+            </b-card>
+            <b-table hover small :items="answers" :fields="afields" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc">
+              <span slot="show_details" slot-scope="row">
+                <b-button size="sm" @click.stop="row.toggleDetails" class="mr-2">
+                  {{ row.detailsShowing ? 'Hide' : 'Show'}} Details
+                </b-button>
+              </span>
+              <span slot="row-details" slot-scope="row">
+                <b-card no-body>
+                  <b-card-body>{{qlist[row.item.q].q}}</b-card-body>
+                  <b-card-footer>
+                    <span v-for="item in qlist[row.item.q].a">
+                        <span v-if="item.correct">{{item.text}}</span>
+                    </span>
+                  </b-card-footer>
+                </b-card>
+              </span>
+            </b-table>
+          </div>
+        </b-container>
+    </div>
+    <!-- Start running your app -->
+    <script src="./app.js"></script>
+    </body>
+</html>
